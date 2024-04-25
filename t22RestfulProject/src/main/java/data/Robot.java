@@ -4,9 +4,12 @@ public class Robot {
 	private int id;
 	private String name;
 	private float speed;
+	private int iswhite;
 	
 	
 	
+	
+
 	public Robot() {
 		super();
 	}
@@ -19,6 +22,19 @@ public class Robot {
 	}
 	
 	
+	public Robot(String name, String speed, int iw) {
+		// TODO Auto-generated constructor stub
+		this.name=name;
+		try {
+			this.speed=Float.parseFloat(speed);
+		}
+		catch(NumberFormatException e) {
+			
+		}
+		
+		this.iswhite=iw;
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -36,6 +52,18 @@ public class Robot {
 	}
 	public void setSpeed(float speed) {
 		this.speed = speed;
+	}
+	
+	public int getIswhite() {
+		return iswhite;
+	}
+
+	public void setIswhite(int iswhite) {
+		this.iswhite = iswhite;
+	}
+	
+	public String toString() {
+		return this.id+"/"+this.name+"/"+this.speed+"/"+this.iswhite;
 	}
 	
 
