@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Send Robot</title>
+
+<script type="text/javascript">
+function sendRobot(form){
+	var robot = new Object();
+	robot.name=form.name.value;
+	robot.speed=form.speed.value;
+	robot.iswhite=-1;
+	for (let i in form.iswhite){
+		if (form.iswhite[i].checked){
+			robot.iswhite=form.iswhite[i].value;
+			break;
+		}
+	}
+	var json=JSON.stringify(robot);
+	document.getElementById("jsonstring").innerHTML=json;
+	
+	var xmlhttp=new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+	  if (this.readyState == 4 && this.status == 200) {
+		    document.getElementById("result").innerHTML = this.responseText;
+		  	/*/Empty form fields
+		    form.breed.value="";
+		    form.weight.value="";*/
+	  }
+	};
+	xmlhttp.open("POST", "/rest/t22RestfulProject/savejsonrobot", true);
+	xmlhttp.setRequestHeader("Content-type", "application/json");
+	xmlhttp.send(json);
+}
+</script>
+</head>
+<body>
+<form>
+ID:<input type="text" name="id" value=""><br>
+Name:<input type="text" name="name" value=""><br>
+Speed:<input type="text" name="weight" value=""><br>
+Iswhite?<br>
+<input type="radio" name="iswhite" value="0">No<br>
+<input type="radio" name="iswhite" value="1">Yes<br>
+<input type="button" name="OK" value="Send" onclick='sendRobot(this.form);'><br>
+</form>
+
+<p id='jasonstring'>JSON</p>
+<p id='result'>Result</p>
+</body>
+</html>
