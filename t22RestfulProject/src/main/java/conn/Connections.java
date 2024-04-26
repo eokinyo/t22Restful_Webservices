@@ -76,6 +76,8 @@ public class Connections {
 		 // Configure which instance and what database user to connect with.
 		config.setDriverClassName(System.getProperty("drivername")); // see appengine-web.xml
 		config.setJdbcUrl("jdbc:mysql://localhost:3306/"+System.getProperty("localdatabasename")+"?useSSL=false"); // see appengine-web.xml
+		
+		/*config.setJdbcUrl("jdbc:mysql://localhost:3306/robotdb?useSSL=false");*/
 		config.setUsername(System.getProperty("localusername")); // see appengine-web.xml
 		config.setPassword(System.getProperty("localpassword")); // see appengine-web.xml
 		

@@ -30,9 +30,9 @@ public class HelloAppEngine extends HttpServlet {
 		Client c=ClientBuilder.newClient();
 		WebTarget wt=c.target(uri);
 		Builder b=wt.request();
-		Robot d=b.get(Robot.class);
+		Robot r=b.get(Robot.class);
 		String s=b.get(String.class);
-		out.println("Object: "+d);
+		out.println("Object: "+r);
 		out.println("JSON: "+s);
 
   }
