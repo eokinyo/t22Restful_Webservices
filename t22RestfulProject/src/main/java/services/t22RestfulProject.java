@@ -45,7 +45,7 @@ public class t22RestfulProject {
 	@Path("/getrobot")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Robot getRobot() {
-		Robot r = new Robot(1, "Haris", 200);
+		Robot r = new Robot();
 		return r;
 	}
 
@@ -91,7 +91,7 @@ public class t22RestfulProject {
 	@Produces(MediaType.APPLICATION_JSON)
 	public ArrayList<Robot> addRobotByGet(@QueryParam("id") int id, @QueryParam("name") String name,
 			@QueryParam("speed") float speed) {
-		Robot r = new Robot(id, name, speed);
+		Robot r = new Robot();
 		ArrayList<Robot> list = getRobotList();
 		list.add(r);
 		return list;
@@ -104,7 +104,7 @@ public class t22RestfulProject {
 	@Consumes("application/x-www-form-urlencoded")
 	public void addRobotByPost(@FormParam("id") int id, @FormParam("name") String name, @FormParam("speed") float speed,
 			@DefaultValue("-1") @FormParam("iswhite") int iw) {
-		Robot r = new Robot(id, name, speed);
+		Robot r = new Robot();
 		r.setIswhite(iw);
 		ArrayList<Robot> list = getRobotList();
 		list.add(r);
@@ -119,6 +119,7 @@ public class t22RestfulProject {
 		}
 	}
 
+	
 	@POST
 	@Path("/addrobot")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -340,7 +341,8 @@ public class t22RestfulProject {
 
 	@GET
 	@Path("/readrobots")
-	public void readRobots() {
+	@Produces(MediaType.APPLICATION_JSON)
+	public ArrayList<Robot> readRobots() {
 		ArrayList<Robot> list = new ArrayList<>();
 		Connection conn = null;
 		try {
@@ -377,14 +379,15 @@ public class t22RestfulProject {
 				e.printStackTrace();
 			}
 		}
-		RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
-		request.setAttribute("Robots", list);
-		try {
-			rd.forward(request, response);
-		} catch (ServletException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return list;
+//		RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
+//		request.setAttribute("Robots", list);
+//		try {
+//			rd.forward(request, response);
+//		} catch (ServletException | IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	public ArrayList<Robot> getRobotList() {
