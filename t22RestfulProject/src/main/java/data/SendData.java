@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 public class SendData {
     private static final String SERVER_URL = "http://192.168.56.1:8080/rest/lego/setfeedbackcollection";
 
-    public static void sendData(int currentSpeed, int currentDistance,int currentIntensity,int timeDiff) {
+    public static void sendData(int currentSpeed, int distanceTravelled,int currentIntensity,int timeTaken) {
         try {
             URL url = new URL(SERVER_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -16,7 +16,7 @@ public class SendData {
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             connection.setDoOutput(true);
 
-            String jsonPayload = String.format("{\"initialSpeed\": %d, \"initialDistance\": %d,\"currentIntensity\": %d,\"timeTaken\": %d}", currentSpeed, currentDistance,currentIntensity,timeDiff);
+            String jsonPayload = String.format("{\"initialSpeed\": %d, \"initialDistance\": %d,\"currentIntensity\": %d,\"timeTaken\": %d}", currentSpeed, distanceTravelled,currentIntensity,timeTaken);
 
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);

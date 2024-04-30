@@ -3,11 +3,21 @@
   <head>
     <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
     <title>Hello App Engine</title>
+    <style>
+#directionSlider {
+    width: 300px !important; 
+}
+ .data-section {
+          background-color: #f8f8f8;
+          border: 1px solid #eaeaea; 
+          padding: 20px; 
+          margin-top: 20px; 
+      }
+</style>
   </head>
 
-  <body onload='readLego();'>
-    <h1>Hello App Engine!</h1>
-    <script>
+  <body onload='readLego();getRunStatus();'>
+  <script>
   function readLego(){
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
@@ -15,7 +25,9 @@
 		   var lego=JSON.parse(this.responseText);
 		   document.getElementById("lego").innerHTML="Id="+lego.id+"<br>Name="+lego.name;
 		   document.getElementById("legoid").value=lego.id;
-		   
+		   runStatus = lego.run;
+		   var button = document.getElementById('toggleRun');
+	        button.value = (lego.run === 1 ? 'Stop' : 'Start');
 		  }
 		};
 		
@@ -26,8 +38,12 @@
 		//Create a new Javascript object
 		var legoSetting=new Object();
 		legoSetting.speed=form.speed.value;
+		legoSetting.distance=form.distance.value;
+		legoSetting.intensity=form.intensity.value;
+		
+		
 		var lego=new Object();
-		lego.id=form.legoid.value;
+		lego.id=form.legoid.value; 
 		legoSetting.lego=lego;
 		
 		var json=JSON.stringify(legoSetting);
@@ -36,25 +52,120 @@
 		xhttp.onreadystatechange = function() {
 		  if (this.readyState == 4 && this.status == 200) {
 		   var settings=JSON.parse(this.responseText);
-		   document.getElementById("settings").innerHTML="ID="+settings.id+" Speed="+settings.speed;
+		   document.getElementById("settings").innerHTML="ID="+settings.id+
+		   " Speed="+settings.speed+
+		   " Distance="+settings.distance+
+		   " Intensity="+settings.intensity;
 		  }
 		};
 		
 		xhttp.open("POST","/rest/lego/setvalues",true);
 		xhttp.setRequestHeader("Content-type","application/json");
 		xhttp.send(json);
-	 
-		
 	}
-  </script>
+  function stopOrStart() {
+	    runStatus = runStatus === 1 ? 0 : 1;
+	    var data = { run: runStatus };
 
-    <table>
-      <tr>
-        <td colspan="2" style="font-weight:bold;">Available Servlets:</td>        
-      </tr>
-      <tr>
-        <td><a href='/hello'>The servlet</a></td>
-      </tr>
-    </table>
+	    var xhttp = new XMLHttpRequest();
+	    xhttp.onreadystatechange = function() {
+	        if (this.readyState == 4) {
+	            if (this.status == 200) {
+	                alert('Run status updated to: ' + runStatus);
+	            } else {
+	                alert('Error updating run status.');
+	            }
+	        }
+	    };
+	    xhttp.open("POST", "/rest/lego/updaterun", true);
+	    xhttp.setRequestHeader("Content-Type", "application/json");
+	    xhttp.send(JSON.stringify(data));
+	}
+  
+  function sendDirectionValue() {
+	    var directionValue = document.getElementById('directionSlider').value;
+	    var legoSetting = {
+	    		direction: parseInt(directionValue, 10),
+// 	            lego: {
+// 	                id: 1  
+// 	            }
+	    };
+
+	    var xhttp = new XMLHttpRequest();
+	    xhttp.open("POST", "/rest/lego/setDirection", true); 
+	    xhttp.setRequestHeader("Content-Type", "application/json");
+	    xhttp.onreadystatechange = function() {
+	        if (this.readyState === 4) {
+	            if (this.status === 201) {
+	                console.log('succesful');
+	        
+	                document.getElementById("direction").innerHTML = "Direction=" + directionValue;
+	            } else {
+	                console.error('false:', this.responseText);
+	            }
+	        }
+	    };
+	    xhttp.send(JSON.stringify(legoSetting));
+	}
+  function currentDatas() {
+	    var xhttp = new XMLHttpRequest();
+	    xhttp.onreadystatechange = function() {
+	        if (this.readyState === XMLHttpRequest.DONE) {
+	            if (this.status === 200) {
+	                var data = this.responseText.trim().split("#");
+	               
+	                if (data.length >= 4) {
+	                   
+	                    document.getElementById("currentSpeed").textContent = data[0];
+	                    document.getElementById("currentIntensity").textContent = data[1];
+	                    document.getElementById("DistanceTravelled").textContent = data[2];
+	                    document.getElementById("timeTaken").textContent = data[3];
+	                } else {
+	                    console.error('Received data is in the wrong format:', this.responseText);
+	                }
+	            } else {
+	                console.error('Error with the request, status code:', this.status);
+	            }
+	        }
+	    };
+	    xhttp.open("GET", "/rest/lego/getCurrentDatas", true); 
+	    xhttp.send();
+	}
+     
+  </script>
+  <div style="display: flex; justify-content: 	space-around;">
+  <div>
+    <h1>Lego Settings</h1>
+	<h3>Lego</h3>
+	<p id='lego'>
+	</p>
+	<h3>Lego Direction Control</h3>
+    <input type="range" id="directionSlider" min="-200" max="200"  name='direction'oninput="sendDirectionValue()">
+    <p id='direction'>
+	</p>
+	<h3>New values</h3>
+	<form>
+	Id: <input id='legoid' type='text' name='legoid' value=''><br>
+	Speed: <input type='text' name='speed' value=''><br>
+	Intensity:  <input type='text' name='intensity' value=''><br>
+	Distance:  <input type='text' name='distance' value=''><br>
+	
+	<input type='button' name='ok' value='OK' onclick='sendData(this.form);'>
+	</form>
+	<p id='settings'>
+	</p>
+	<h3>Stop or Start</h3>
+	<input type='button' name='toggleRun' value='Toggle Run' onclick='stopOrStart();'>
+	</div>
+	
+	 <div class="data-section">
+      <h1>Robot Data</h1>
+      <p>Current Speed: <span id="currentSpeed"></span></p>
+      <p>Current Intensity: <span id="currentIntensity"></span></p>
+      <p>Distance Travelled: <span id="DistanceTravelled"></span></p>
+      <p>Time Taken: <span id="timeTaken"></span></p>
+      <input type='button' name='current data' value='Update Data' onclick='currentDatas();'>
+    </div>
+    	</div>
   </body>
 </html>
