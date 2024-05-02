@@ -49,7 +49,7 @@ public class t22RestfulProject {
 		return r;
 	}
 
-	@GET
+	/*@GET
 	@Path("/getonerobot/{par}")
 	@Produces(MediaType.APPLICATION_JSON)
 
@@ -129,59 +129,52 @@ public class t22RestfulProject {
 
 	    // Retrieve the updated list of robots from the database
 	    readRobots();
-	}
+	}*/
 
 	@POST
 	@Path("/addrobot")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ArrayList<Robot> addRobot(Robot t22) {
-		ArrayList<Robot> list=new ArrayList<>();
-		//speed = speed.replace(",", ".");// If user uses comma
-		Robot r = t22;
-		Connection conn = null;
-		try {
-			conn = Connections.getConnection();
-		} catch (Exception e) {
-			/*
-			 * r=new Robot(0, "Adding robots failed", 0); //For debugging if connection
-			 * fails //list.add(r); return r;
-			 */
-		}
-		// Using normal Prepared statement to add the values into the database
-		try {
-			PreparedStatement pstmt = conn.prepareStatement("insert into robot(name, speed, iswhite) values(?,?,?)");
-			pstmt.setString(1, t22.getName());
-			pstmt.setFloat(2, t22.getSpeed());
-			pstmt.setInt(3, t22.getIswhite());
-			pstmt.executeUpdate();
+	    ArrayList<Robot> list = new ArrayList<>();
 
-			// Using common statement while reading, because there are no variables in the
-			// sql statement
-			
-			 Statement stmt=conn.createStatement(); ResultSet
-			 RS=stmt.executeQuery("select * from robot"); while (RS.next()) { Robot
-			 robot=new Robot(); robot.setId(RS.getInt("id"));
-			 robot.setName(RS.getString("name")); robot.setSpeed(RS.getFloat("speed"));
-			 list.add(robot); }
-			 
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		// Before the function ends, the connection should be closed
-		// This closing just returns the connection to the connection pool
-		finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return list;
+	    // speed = speed.replace(",", "."); // If user uses a comma
+
+	    Connection conn = null;
+	    try {
+	        conn = Connections.getConnection();
+	        PreparedStatement pstmt = conn.prepareStatement("INSERT INTO robot(name, speed, iswhite, angle) VALUES(?, ?, ?, ?)");
+	        pstmt.setString(1, t22.getName());
+	        pstmt.setFloat(2, t22.getSpeed());
+	        pstmt.setInt(3, t22.getIswhite());
+	        pstmt.setFloat(4, t22.getAngle());
+	        pstmt.executeUpdate();
+
+	        // Read all robots from the database
+	        Statement stmt = conn.createStatement();
+	        ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
+	        while (rs.next()) {
+	            Robot robot = new Robot();
+	            robot.setId(rs.getInt("id"));
+	            robot.setName(rs.getString("name"));
+	            robot.setSpeed(rs.getFloat("speed"));
+	            robot.setIswhite(rs.getInt("iswhite"));
+	            robot.setAngle(rs.getFloat("angle"));
+	            list.add(robot);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (conn != null) {
+	            try {
+	                conn.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	    return list;
 	}
-
 	@POST
 	@Path("/savejsonrobot")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -226,40 +219,31 @@ public class t22RestfulProject {
 	@POST
 	@Path("/updaterobot")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void updateRobot(@FormParam("id") int id, @FormParam("name") String name, @FormParam("speed") String speed,
-			@FormParam("iswhite") int iw) {
-		speed = speed.replace(",", ".");// If user uses comma
-		Robot r = new Robot(name, speed, iw);
-		Connection conn = null;
-		try {
-			conn = Connections.getConnection();
-		} catch (Exception e) {
-
-		}
-		// Using normal Prepared statement to add the values into the database
-		try {
-			PreparedStatement pstmt = conn.prepareStatement("update robotset name=?, speed=?, iswhite=? where id =?");
-			pstmt.setString(1, name);
-			pstmt.setString(2, speed);
-			pstmt.setInt(3, iw);
-			pstmt.setInt(4, id);
-			pstmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		// Before the function ends, the connection should be closed
-		// This closing just returns the connection to the connection pool
-		finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		readRobots();
+	public void updateRobot(@FormParam("id") int id, @FormParam("name") String name, @FormParam("speed") float speed,
+	                        @FormParam("iswhite") int iw, @FormParam("angle") float angle) {
+	    Connection conn = null;
+	    try {
+	        conn = Connections.getConnection();
+	        PreparedStatement pstmt = conn.prepareStatement("UPDATE robot SET name=?, speed=?, iswhite=?, angle=? WHERE id=?");
+	        pstmt.setString(1, name);
+	        pstmt.setFloat(2, speed);
+	        pstmt.setInt(3, iw);
+	        pstmt.setFloat(4, angle);
+	        pstmt.setInt(5, id);
+	        pstmt.executeUpdate();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (conn != null) {
+	            try {
+	                conn.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
 	}
+
 
 	@GET
 	@Path("/deleterobot/{id}")
@@ -352,54 +336,40 @@ public class t22RestfulProject {
 
 	@GET
 	@Path("/readrobots")
+	@Produces(MediaType.TEXT_PLAIN)
 	public String readRobots() {
-		ArrayList<Robot> list = new ArrayList<>();
-		Connection conn = null;
-		try {
-			conn = Connections.getConnection();
-		} catch (Exception e) {
-
-		}
-		// Using normal Prepared statement to add the values into the database
-		try {
-
-			// Using common statement while reading, because there are no variables in the
-			// sql statement
-			Statement stmt = conn.createStatement();
-			ResultSet RS = stmt.executeQuery("select * from robot");
-			while (RS.next()) {
-				Robot robot = new Robot();
-				robot.setId(RS.getInt("id"));
-				robot.setName(RS.getString("name"));
-				robot.setSpeed(RS.getFloat("speed"));
-				robot.setIswhite(RS.getInt("iswhite"));
-				list.add(robot);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		// Before the function ends, the connection should be closed
-		// This closing just returns the connection to the connection pool
-		finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		/*RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
-		request.setAttribute("Robots", list);
-		try {
-			rd.forward(request, response);
-		} catch (ServletException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		Robot finalRobot= list.get(list.size()-1);
-		return finalRobot.getName()+"#"+finalRobot.getSpeed()+"#"+finalRobot.getIswhite();
+	    ArrayList<Robot> list = new ArrayList<>();
+	    Connection conn = null;
+	    try {
+	        conn = Connections.getConnection();
+	        Statement stmt = conn.createStatement();
+	        ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
+	        while (rs.next()) {
+	            Robot robot = new Robot();
+	            robot.setId(rs.getInt("id"));
+	            robot.setName(rs.getString("name"));
+	            robot.setSpeed(rs.getFloat("speed"));
+	            robot.setIswhite(rs.getInt("iswhite"));
+	            robot.setAngle(rs.getFloat("angle"));
+	            list.add(robot);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (conn != null) {
+	            try {
+	                conn.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	    
+	    // Return information about the last robot added
+	    Robot finalRobot = list.get(list.size() - 1);
+	    return finalRobot.getName() + "#" + finalRobot.getSpeed() + "#" + finalRobot.getIswhite() + "#" + finalRobot.getAngle();
 	}
+ 
 
 	public ArrayList<Robot> getRobotList() {
 		ArrayList<Robot> list = new ArrayList<>();
