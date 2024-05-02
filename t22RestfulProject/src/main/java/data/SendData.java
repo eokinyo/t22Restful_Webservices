@@ -6,7 +6,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class SendData {
-    private static final String SERVER_URL = "http://192.168.56.1:8080/rest/lego/setfeedbackcollection";
+    private static final String SERVER_URL = "http://127.0.0.1:8080/rest/t22RestfulProject/setfeedbackcollection";
 
     public static void sendData(int currentSpeed, int distanceTravelled,int currentIntensity,int timeTaken) {
         try {

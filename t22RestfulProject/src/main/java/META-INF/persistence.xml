@@ -4,7 +4,7 @@
 	<persistence-unit name="lego">
 		<class>data.Lego</class>
 		<class>data.LegoSetting</class>
-		<class>data.FeedbackCollection</class>
+		<class>data.RobotInfo</class>
 		
 		
 <!-- If using MySQL 5.7 or newer -->
