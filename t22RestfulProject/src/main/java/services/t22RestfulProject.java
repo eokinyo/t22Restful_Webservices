@@ -133,12 +133,12 @@ public class t22RestfulProject {
 
 	@POST
 	@Path("/addrobot")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void addRobot(@FormParam("name") String name, @FormParam("speed") String speed,
-			@FormParam("iswhite") int iw) {
-		/* ArrayList<Robot> list=new ArrayList<>(); */
-		speed = speed.replace(",", ".");// If user uses comma
-		/*Robot r = new Robot(name, speed, iw);*/
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ArrayList<Robot> addRobot(Robot t22) {
+		ArrayList<Robot> list=new ArrayList<>();
+		//speed = speed.replace(",", ".");// If user uses comma
+		Robot r = t22;
 		Connection conn = null;
 		try {
 			conn = Connections.getConnection();
@@ -151,20 +151,20 @@ public class t22RestfulProject {
 		// Using normal Prepared statement to add the values into the database
 		try {
 			PreparedStatement pstmt = conn.prepareStatement("insert into robot(name, speed, iswhite) values(?,?,?)");
-			pstmt.setString(1, name);
-			pstmt.setString(2, speed);
-			pstmt.setInt(3, iw);
+			pstmt.setString(1, t22.getName());
+			pstmt.setFloat(2, t22.getSpeed());
+			pstmt.setInt(3, t22.getIswhite());
 			pstmt.executeUpdate();
 
 			// Using common statement while reading, because there are no variables in the
 			// sql statement
-			/*
-			 * Statement stmt=conn.createStatement(); ResultSet
-			 * RS=stmt.executeQuery("select * from robot"); while (RS.next()) { Robot
-			 * robot=new Robot(); robot.setId(RS.getInt("id"));
-			 * robot.setBreed(RS.getString("name")); robot.setWeight(RS.getFloat("speed"));
-			 * list.add(robot); }
-			 */
+			
+			 Statement stmt=conn.createStatement(); ResultSet
+			 RS=stmt.executeQuery("select * from robot"); while (RS.next()) { Robot
+			 robot=new Robot(); robot.setId(RS.getInt("id"));
+			 robot.setName(RS.getString("name")); robot.setSpeed(RS.getFloat("speed"));
+			 list.add(robot); }
+			 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -179,7 +179,7 @@ public class t22RestfulProject {
 				e.printStackTrace();
 			}
 		}
-		readRobots();
+		return list;
 	}
 
 	@POST
@@ -352,7 +352,7 @@ public class t22RestfulProject {
 
 	@GET
 	@Path("/readrobots")
-	public void readRobots() {
+	public String readRobots() {
 		ArrayList<Robot> list = new ArrayList<>();
 		Connection conn = null;
 		try {
@@ -389,19 +389,21 @@ public class t22RestfulProject {
 				e.printStackTrace();
 			}
 		}
-		RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
+		/*RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
 		request.setAttribute("Robots", list);
 		try {
 			rd.forward(request, response);
 		} catch (ServletException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
+		Robot finalRobot= list.get(list.size()-1);
+		return finalRobot.getName()+"#"+finalRobot.getSpeed()+"#"+finalRobot.getIswhite();
 	}
 
 	public ArrayList<Robot> getRobotList() {
 		ArrayList<Robot> list = new ArrayList<>();
-		list.add(new Robot(1, "Haris", 30));
+		list.add(new Robot(1, "K", 30));
 		list.add(new Robot(2, "Hari", 25));
 		list.add(new Robot(3, "Har", 40));
 		list.add(new Robot(4, "Ha", 20));
