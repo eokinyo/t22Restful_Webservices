@@ -5,8 +5,9 @@ public class Robot {
     private String name;
     private float speed;
     private int iswhite;
-    private float angle; // Existing angle property
-    private float color; // New color property
+    private float angle; 
+    private float color;
+    private float time;
 
     // Existing constructors
 
@@ -92,10 +93,16 @@ public class Robot {
         return color;
     }
 
-    public void setColor(float color) {
-        this.color = color;
+    public void setColor(float time) {
+        this.time = time;
+    }
+    public float getTime() {
+        return time;
     }
 
+    public void setTime(float time) {
+        this.time = time;
+    }
     @Override
     public String toString() {
         return this.id + "/" + this.name + "/" + this.speed + "/" + this.iswhite + "/" + this.angle + "/" + this.color;
