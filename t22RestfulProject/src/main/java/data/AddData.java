@@ -1,6 +1,6 @@
 package data;
 
-public class AddData {
+/*public class AddData {
     private int motorA;
     private int motorB;
     private long startTime;
@@ -54,4 +54,4 @@ public class AddData {
     public void setInitialDistance() {
         this.initialDistance = (int) Robot.getDistance();
     }
-}
+}*/

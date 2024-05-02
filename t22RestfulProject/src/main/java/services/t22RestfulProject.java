@@ -45,7 +45,7 @@ public class t22RestfulProject {
 	@Path("/getrobot")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Robot getRobot() {
-		Robot r = new Robot();
+		Robot r = new Robot(1, "Haris", 200);
 		return r;
 	}
 
@@ -91,7 +91,7 @@ public class t22RestfulProject {
 	@Produces(MediaType.APPLICATION_JSON)
 	public ArrayList<Robot> addRobotByGet(@QueryParam("id") int id, @QueryParam("name") String name,
 			@QueryParam("speed") float speed) {
-		Robot r = new Robot();
+		Robot r = new Robot(id, name, speed);
 		ArrayList<Robot> list = getRobotList();
 		list.add(r);
 		return list;
@@ -103,23 +103,34 @@ public class t22RestfulProject {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes("application/x-www-form-urlencoded")
 	public void addRobotByPost(@FormParam("id") int id, @FormParam("name") String name, @FormParam("speed") float speed,
-			@DefaultValue("-1") @FormParam("iswhite") int iw) {
-		Robot r = new Robot();
-		r.setIswhite(iw);
-		ArrayList<Robot> list = getRobotList();
-		list.add(r);
+	        @DefaultValue("-1") @FormParam("iswhite") int iw) {
+	    Robot r = new Robot(id, name, speed);
+	    r.setIswhite(iw);
 
-		RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
-		request.setAttribute("Robots", list);
-		try {
-			rd.forward(request, response);
-		} catch (ServletException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	    // Add the robot to the database
+	    Connection conn = null;
+	    try {
+	        conn = Connections.getConnection();
+	        PreparedStatement pstmt = conn.prepareStatement("insert into robot(name, speed, iswhite) values(?,?,?)");
+	        pstmt.setString(1, name);
+	        pstmt.setFloat(2, speed);
+	        pstmt.setInt(3, iw);
+	        pstmt.executeUpdate();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (conn != null)
+	                conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    // Retrieve the updated list of robots from the database
+	    readRobots();
 	}
 
-	
 	@POST
 	@Path("/addrobot")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -170,7 +181,7 @@ public class t22RestfulProject {
 		}
 		readRobots();
 	}
-	
+
 	@POST
 	@Path("/savejsonrobot")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -193,7 +204,7 @@ public class t22RestfulProject {
 			pstmt.setInt(3, robot.getIswhite());
 			pstmt.executeUpdate();
 
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -210,8 +221,8 @@ public class t22RestfulProject {
 		}
 		return robot;
 	}
-	
-	
+
+
 	@POST
 	@Path("/updaterobot")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -223,7 +234,7 @@ public class t22RestfulProject {
 		try {
 			conn = Connections.getConnection();
 		} catch (Exception e) {
-			
+
 		}
 		// Using normal Prepared statement to add the values into the database
 		try {
@@ -341,8 +352,7 @@ public class t22RestfulProject {
 
 	@GET
 	@Path("/readrobots")
-	@Produces(MediaType.APPLICATION_JSON)
-	public ArrayList<Robot> readRobots() {
+	public void readRobots() {
 		ArrayList<Robot> list = new ArrayList<>();
 		Connection conn = null;
 		try {
@@ -379,15 +389,14 @@ public class t22RestfulProject {
 				e.printStackTrace();
 			}
 		}
-		return list;
-//		RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
-//		request.setAttribute("Robots", list);
-//		try {
-//			rd.forward(request, response);
-//		} catch (ServletException | IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
+		request.setAttribute("Robots", list);
+		try {
+			rd.forward(request, response);
+		} catch (ServletException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public ArrayList<Robot> getRobotList() {

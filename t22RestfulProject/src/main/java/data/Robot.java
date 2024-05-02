@@ -1,11 +1,11 @@
 package data;
 
 public class Robot {
-	/*private int id;
+	private int id;
 	private String name;
 	private float speed;
-	private int iswhite;*/
-	private static int speed;
+	private int iswhite;
+	/*private static int speed;
 	private static int motorASpeed;
 	private static int motorBSpeed;
 	private static int direction;
@@ -217,13 +217,13 @@ public class Robot {
 			avoidingObstacle = true;
 
 		}
-	}
+	}*/
 	
 	
 	
 	
 
-	/*public Robot() {
+	public Robot() {
 		super();
 	}
 	
@@ -277,7 +277,7 @@ public class Robot {
 	
 	public String toString() {
 		return this.id+"/"+this.name+"/"+this.speed+"/"+this.iswhite;
-	}*/
+	}
 	
 
 }
