@@ -5,7 +5,8 @@ public class Robot {
     private String name;
     private float speed;
     private int iswhite;
-    private float angle; // New angle property
+    private float angle; // Existing angle property
+    private float color; // New color property
 
     // Existing constructors
 
@@ -18,28 +19,34 @@ public class Robot {
         this.id = id;
         this.name = name;
         this.speed = speed;
+        this.iswhite = 0; // Default iswhite to 0
+        this.angle = 0.0f; // Default angle to 0.0
+        this.color = 0.0f; // Default color to 0.0
     }
 
-    public Robot(int id, String name, float speed, int iswhite, float angle) {
+    public Robot(int id, String name, float speed, int iswhite, float angle, float color) {
         this.id = id;
         this.name = name;
         this.speed = speed;
         this.iswhite = iswhite;
         this.angle = angle;
+        this.color = color;
     }
 
-    public Robot(String name, String speed, int iw, float angle) {
+    public Robot(String name, String speed, int iw, float angle, float color) {
         this.name = name;
         try {
             this.speed = Float.parseFloat(speed);
         } catch (NumberFormatException e) {
             // Handle invalid input
+            this.speed = 0.0f;
         }
         this.iswhite = iw;
         this.angle = angle;
+        this.color = color;
     }
 
-    // Getter and setter methods for id, name, speed, iswhite, and angle
+    // Getter and setter methods for id, name, speed, iswhite, angle, and color
 
     public int getId() {
         return id;
@@ -81,8 +88,16 @@ public class Robot {
         this.angle = angle;
     }
 
+    public float getColor() {
+        return color;
+    }
+
+    public void setColor(float color) {
+        this.color = color;
+    }
+
     @Override
     public String toString() {
-        return this.id + "/" + this.name + "/" + this.speed + "/" + this.iswhite + "/" + this.angle;
+        return this.id + "/" + this.name + "/" + this.speed + "/" + this.iswhite + "/" + this.angle + "/" + this.color;
     }
 }

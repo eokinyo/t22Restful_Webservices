@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,356 +28,269 @@ import data.Robot;
 
 @Path("/t22RestfulProject")
 public class t22RestfulProject {
-	@Context
-	HttpServletRequest request;
-	@Context
-	HttpServletResponse response;
+    @Context
+    HttpServletRequest request;
+    @Context
+    HttpServletResponse response;
 
-	@GET
-	@Path("/info")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String info() {
-		return "<h1>t22RestfulProject</h1>";
-	}
+    @GET
+    @Path("/info")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String info() {
+        return "<h1>t22RestfulProject</h1>";
+    }
 
-	@GET
-	@Path("/getrobot")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Robot getRobot() {
-		Robot r = new Robot(1, "Haris", 200);
-		return r;
-	}
+    @GET
+    @Path("/getrobot")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Robot getRobot() {
+        Robot r = new Robot(1, "Haris", 200, 0, 0.0f, 0);
+        return r;
+    }
 
-	/*@GET
-	@Path("/getonerobot/{par}")
-	@Produces(MediaType.APPLICATION_JSON)
+    @POST
+    @Path("/addrobot")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Robot> addRobot(Robot t22) {
+        ArrayList<Robot> list = new ArrayList<>();
 
-	public Robot getOneRobot(@PathParam("par") int id) {
-		ArrayList<Robot> list = getRobotList();
-		return list.get(id);
-	}
+        Connection conn = null;
+        try {
+            conn = Connections.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO robot(name, speed, iswhite, angle, color) VALUES(?, ?, ?, ?, ?)");
+            pstmt.setString(1, t22.getName());
+            pstmt.setFloat(2, t22.getSpeed());
+            pstmt.setInt(3, t22.getIswhite());
+            pstmt.setFloat(4, t22.getAngle());
+            pstmt.setFloat(5, t22.getColor());
+            pstmt.executeUpdate();
 
-	@GET
-	@Path("/getrobotsbyspeed/{p1}/{p2}")
-	@Produces(MediaType.APPLICATION_JSON)
+            // Read all robots from the database
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
+            while (rs.next()) {
+                Robot robot = new Robot();
+                robot.setId(rs.getInt("id"));
+                robot.setName(rs.getString("name"));
+                robot.setSpeed(rs.getFloat("speed"));
+                robot.setIswhite(rs.getInt("iswhite"));
+                robot.setAngle(rs.getFloat("angle"));
+                robot.setColor(rs.getFloat("color"));
+                list.add(robot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return list;
+    }
 
-	public ArrayList<Robot> getRobotsByName(@PathParam("p1") float low, @PathParam("p1") float high) {
-		ArrayList<Robot> list = getRobotList();
-		ArrayList<Robot> result = new ArrayList<>();
-		for (Robot d : list) {
-			if (d.getSpeed() >= low && d.getSpeed() <= high) {
-				result.add(d);
-			}
-		}
-		return result;
-	}
+    @POST
+    @Path("/savejsonrobot")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Robot saveJsonRobot(Robot robot) {
+        Connection conn = null;
+        try {
+            conn = Connections.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO robot(name, speed, iswhite, angle, color) VALUES(?, ?, ?, ?, ?)");
+            pstmt.setString(1, robot.getName());
+            pstmt.setFloat(2, robot.getSpeed());
+            pstmt.setInt(3, robot.getIswhite());
+            pstmt.setFloat(4, robot.getAngle());
+            pstmt.setFloat(5, robot.getColor());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return robot;
+    }
 
-	@GET
-	@Path("/readall")
-	public void readAll() {
-		RequestDispatcher rd = request.getRequestDispatcher("/jsp/printrobots.jsp");
-		request.setAttribute("Robots", getRobotList());
-		try {
-			rd.forward(request, response);
-		} catch (ServletException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    @POST
+    @Path("/updaterobot")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public void updateRobot(@FormParam("id") int id, @FormParam("name") String name, @FormParam("speed") float speed,
+                            @FormParam("iswhite") int iw, @FormParam("angle") float angle, @FormParam("color") float color) {
+        Connection conn = null;
+        try {
+            conn = Connections.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement("UPDATE robot SET name=?, speed=?, iswhite=?, angle=?, color=? WHERE id=?");
+            pstmt.setString(1, name);
+            pstmt.setFloat(2, speed);
+            pstmt.setInt(3, iw);
+            pstmt.setFloat(4, angle);
+            pstmt.setFloat(5, color);
+            pstmt.setInt(6, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
-	@GET
-	@Path("/addrobotbyget")
-	@Produces(MediaType.APPLICATION_JSON)
-	public ArrayList<Robot> addRobotByGet(@QueryParam("id") int id, @QueryParam("name") String name,
-			@QueryParam("speed") float speed) {
-		Robot r = new Robot(id, name, speed);
-		ArrayList<Robot> list = getRobotList();
-		list.add(r);
-		return list;
+    @GET
+    @Path("/deleterobot/{id}")
+    public void deleteRobot(@PathParam("id") int id) {
+        Connection conn = null;
+        try {
+            conn = Connections.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement("DELETE FROM robot WHERE id = ?");
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
-	}
+    @GET
+    @Path("/readforupdate/{id}")
+    public void readForUpdate(@PathParam("id") int id) {
+        Connection conn = null;
+        Robot r = new Robot();
+        try {
+            conn = Connections.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM robot WHERE id = ?");
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                r.setId(rs.getInt("id"));
+                r.setName(rs.getString("name"));
+                r.setSpeed(rs.getFloat("speed"));
+                r.setIswhite(rs.getInt("iswhite"));
+                r.setAngle(rs.getFloat("angle"));
+                r.setColor(rs.getFloat("color"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        RequestDispatcher rd = request.getRequestDispatcher("/jsp/updaterobot.jsp");
+        request.setAttribute("robot", r);
+        try {
+            rd.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@POST
-	@Path("/addrobotbypost")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes("application/x-www-form-urlencoded")
-	public void addRobotByPost(@FormParam("id") int id, @FormParam("name") String name, @FormParam("speed") float speed,
-	        @DefaultValue("-1") @FormParam("iswhite") int iw) {
-	    Robot r = new Robot(id, name, speed);
-	    r.setIswhite(iw);
+    @GET
+    @Path("/readrobots")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String readRobots() {
+        ArrayList<Robot> list = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = Connections.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
+            while (rs.next()) {
+                Robot robot = new Robot();
+                robot.setId(rs.getInt("id"));
+                robot.setName(rs.getString("name"));
+                robot.setSpeed(rs.getFloat("speed"));
+                robot.setIswhite(rs.getInt("iswhite"));
+                robot.setAngle(rs.getFloat("angle"));
+                robot.setColor(rs.getFloat("color"));
+                list.add(robot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        // Return information about the last robot added
+        Robot finalRobot = list.get(list.size() - 1);
+        return finalRobot.getName() + "#" + finalRobot.getSpeed() + "#" + finalRobot.getIswhite() + "#" + finalRobot.getAngle() + "#" + finalRobot.getColor();
+    }
 
-	    // Add the robot to the database
-	    Connection conn = null;
-	    try {
-	        conn = Connections.getConnection();
-	        PreparedStatement pstmt = conn.prepareStatement("insert into robot(name, speed, iswhite) values(?,?,?)");
-	        pstmt.setString(1, name);
-	        pstmt.setFloat(2, speed);
-	        pstmt.setInt(3, iw);
-	        pstmt.executeUpdate();
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    } finally {
-	        try {
-	            if (conn != null)
-	                conn.close();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	    }
+    // Define any additional helper methods here as needed
 
-	    // Retrieve the updated list of robots from the database
-	    readRobots();
-	}*/
-
-	@POST
-	@Path("/addrobot")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public ArrayList<Robot> addRobot(Robot t22) {
-	    ArrayList<Robot> list = new ArrayList<>();
-
-	    // speed = speed.replace(",", "."); // If user uses a comma
-
-	    Connection conn = null;
-	    try {
-	        conn = Connections.getConnection();
-	        PreparedStatement pstmt = conn.prepareStatement("INSERT INTO robot(name, speed, iswhite, angle) VALUES(?, ?, ?, ?)");
-	        pstmt.setString(1, t22.getName());
-	        pstmt.setFloat(2, t22.getSpeed());
-	        pstmt.setInt(3, t22.getIswhite());
-	        pstmt.setFloat(4, t22.getAngle());
-	        pstmt.executeUpdate();
-
-	        // Read all robots from the database
-	        Statement stmt = conn.createStatement();
-	        ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
-	        while (rs.next()) {
-	            Robot robot = new Robot();
-	            robot.setId(rs.getInt("id"));
-	            robot.setName(rs.getString("name"));
-	            robot.setSpeed(rs.getFloat("speed"));
-	            robot.setIswhite(rs.getInt("iswhite"));
-	            robot.setAngle(rs.getFloat("angle"));
-	            list.add(robot);
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    } finally {
-	        if (conn != null) {
-	            try {
-	                conn.close();
-	            } catch (SQLException e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    }
-	    return list;
-	}
-	@POST
-	@Path("/savejsonrobot")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Robot saveJsonRobot(Robot robot) {
-		Connection conn = null;
-		try {
-			conn = Connections.getConnection();
-		} catch (Exception e) {
-			/*
-			 * r=new Robot(0, "Adding robots failed", 0); //For debugging if connection
-			 * fails //list.add(r); return r;
-			 */
-		}
-		// Using normal Prepared statement to add the values into the database
-		try {
-			PreparedStatement pstmt = conn.prepareStatement("insert into robot(name, speed, iswhite) values(?,?,?)");
-			pstmt.setString(1, robot.getName());
-			pstmt.setFloat(2, robot.getSpeed());
-			pstmt.setInt(3, robot.getIswhite());
-			pstmt.executeUpdate();
-
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		// Before the function ends, the connection should be closed
-		// This closing just returns the connection to the connection pool
-		finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return robot;
-	}
-
-
-	@POST
-	@Path("/updaterobot")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void updateRobot(@FormParam("id") int id, @FormParam("name") String name, @FormParam("speed") float speed,
-	                        @FormParam("iswhite") int iw, @FormParam("angle") float angle) {
-	    Connection conn = null;
-	    try {
-	        conn = Connections.getConnection();
-	        PreparedStatement pstmt = conn.prepareStatement("UPDATE robot SET name=?, speed=?, iswhite=?, angle=? WHERE id=?");
-	        pstmt.setString(1, name);
-	        pstmt.setFloat(2, speed);
-	        pstmt.setInt(3, iw);
-	        pstmt.setFloat(4, angle);
-	        pstmt.setInt(5, id);
-	        pstmt.executeUpdate();
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    } finally {
-	        if (conn != null) {
-	            try {
-	                conn.close();
-	            } catch (SQLException e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    }
-	}
-
-
-	@GET
-	@Path("/deleterobot/{id}")
-	public void deleteRobot(@PathParam("id") int id) {
-		Connection conn = null;
-		try {
-			conn = Connections.getConnection();
-		} catch (Exception e) {
-			/*
-			 * r=new Robot(0, "Adding robots failed", 0); //For debugging if connection
-			 * fails //list.add(r); return r;
-			 */
-		}
-		// Using normal Prepared statement to add the values into the database
-		try {
-			PreparedStatement pstmt = conn.prepareStatement("delete from robot where id = ?");
-			pstmt.setInt(1, id);
-			pstmt.executeUpdate();
-
-			// Using common statement while reading, because there are no variables in the
-			// sql statement
-			/*
-			 * Statement stmt=conn.createStatement(); ResultSet
-			 * RS=stmt.executeQuery("select * from robot"); while (RS.next()) { Robot
-			 * robot=new Robot(); robot.setId(RS.getInt("id"));
-			 * robot.setBreed(RS.getString("name")); robot.setWeight(RS.getFloat("speed"));
-			 * list.add(robot); }
-			 */
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		// Before the function ends, the connection should be closed
-		// This closing just returns the connection to the connection pool
-		finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		readRobots();
-	}
-
-	@GET
-	@Path("/readforupdate/{id}")
-	public void readForUpdate(@PathParam("id") int id) {
-		Connection conn = null;
-		Robot r = new Robot();
-		try {
-			conn = Connections.getConnection();
-		} catch (Exception e) {
-
-		}
-		try {
-			PreparedStatement pstmt = conn.prepareStatement("select * from robot where id = ?");
-			pstmt.setInt(1, id);
-			ResultSet RS = pstmt.executeQuery();
-			if (RS.next()) {
-				r.setId(RS.getInt("id"));
-				r.setName(RS.getString("name"));
-				r.setSpeed(RS.getFloat("speed"));
-				r.setIswhite(RS.getInt("iswhite"));
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		// Before the function ends, the connection should be closed
-		// This closing just returns the connection to the connection pool
-		finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		RequestDispatcher rd = request.getRequestDispatcher("/jsp/updaterobot.jsp");
-		request.setAttribute("robot", r);
-		try {
-			rd.forward(request, response);
-		} catch (ServletException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@GET
-	@Path("/readrobots")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String readRobots() {
-	    ArrayList<Robot> list = new ArrayList<>();
-	    Connection conn = null;
-	    try {
-	        conn = Connections.getConnection();
-	        Statement stmt = conn.createStatement();
-	        ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
-	        while (rs.next()) {
-	            Robot robot = new Robot();
-	            robot.setId(rs.getInt("id"));
-	            robot.setName(rs.getString("name"));
-	            robot.setSpeed(rs.getFloat("speed"));
-	            robot.setIswhite(rs.getInt("iswhite"));
-	            robot.setAngle(rs.getFloat("angle"));
-	            list.add(robot);
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    } finally {
-	        if (conn != null) {
-	            try {
-	                conn.close();
-	            } catch (SQLException e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    }
-	    
-	    // Return information about the last robot added
-	    Robot finalRobot = list.get(list.size() - 1);
-	    return finalRobot.getName() + "#" + finalRobot.getSpeed() + "#" + finalRobot.getIswhite() + "#" + finalRobot.getAngle();
-	}
- 
-
-	public ArrayList<Robot> getRobotList() {
-		ArrayList<Robot> list = new ArrayList<>();
-		list.add(new Robot(1, "K", 30));
-		list.add(new Robot(2, "Hari", 25));
-		list.add(new Robot(3, "Har", 40));
-		list.add(new Robot(4, "Ha", 20));
-		list.add(new Robot(5, "H", 1));
-		return list;
-	}
-
+    public ArrayList<Robot> getRobotList() {
+        ArrayList<Robot> list = new ArrayList<>();
+        list.add(new Robot(1, "K", 30, 0, 0.0f, 0.0f));
+        list.add(new Robot(2, "Hari", 25, 0, 0.0f, 0.0f));
+        list.add(new Robot(3, "Har", 40, 0, 0.0f, 0.0f));
+        list.add(new Robot(4, "Ha", 20, 0, 0.0f, 0.0f));
+        list.add(new Robot(5, "H", 1, 0, 0.0f, 0.0f));
+        return list;
+    }
+    
+    @GET
+    @Path("/getallrobots")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Robot> getAllRobots() {
+        ArrayList<Robot> robots = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = Connections.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
+            while (rs.next()) {
+                Robot robot = new Robot();
+                robot.setId(rs.getInt("id"));
+                robot.setName(rs.getString("name"));
+                robot.setSpeed(rs.getFloat("speed"));
+                robot.setIswhite(rs.getInt("iswhite"));
+                robot.setAngle(rs.getFloat("angle"));
+                robot.setColor(rs.getFloat("color"));
+                robots.add(robot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return robots;
+    }
 }
