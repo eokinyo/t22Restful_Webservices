@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 
 import data.*;
 
-@Path("/lego")
+/*@Path("/lego")
 public class LegoService {
 	EntityManagerFactory emf = Persistence.createEntityManagerFactory("lego");
 
@@ -215,4 +215,4 @@ public class LegoService {
 	    }
 	}
 
-}
+}*/

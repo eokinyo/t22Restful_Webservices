@@ -259,4 +259,39 @@ public class t22RestfulProject {
         list.add(new Robot(5, "H", 1, 0, 0.0f, 0.0f));
         return list;
     }
+    
+    @GET
+    @Path("/getallrobots")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Robot> getAllRobots() {
+        ArrayList<Robot> robots = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = Connections.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
+            while (rs.next()) {
+                Robot robot = new Robot();
+                robot.setId(rs.getInt("id"));
+                robot.setName(rs.getString("name"));
+                robot.setSpeed(rs.getFloat("speed"));
+                robot.setIswhite(rs.getInt("iswhite"));
+                robot.setAngle(rs.getFloat("angle"));
+                robot.setColor(rs.getFloat("color"));
+                robots.add(robot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return robots;
+    }
+}
 }
