@@ -59,7 +59,7 @@
 		  }
 		};
 		
-		xhttp.open("POST","/rest/lego/setvalues",true);
+		xhttp.open("POST","/rest/t22RestfulProject/setvalues",true);
 		xhttp.setRequestHeader("Content-type","application/json");
 		xhttp.send(json);
 	}
@@ -77,7 +77,7 @@
 	            }
 	        }
 	    };
-	    xhttp.open("POST", "/rest/lego/updaterun", true);
+	    xhttp.open("POST", "/rest/t22RestfulProject/updaterun", true);
 	    xhttp.setRequestHeader("Content-Type", "application/json");
 	    xhttp.send(JSON.stringify(data));
 	}
@@ -92,7 +92,7 @@
 	    };
 
 	    var xhttp = new XMLHttpRequest();
-	    xhttp.open("POST", "/rest/lego/setDirection", true); 
+	    xhttp.open("POST", "/rest/t22RestfulProject/setDirection", true); 
 	    xhttp.setRequestHeader("Content-Type", "application/json");
 	    xhttp.onreadystatechange = function() {
 	        if (this.readyState === 4) {
@@ -128,7 +128,7 @@
 	            }
 	        }
 	    };
-	    xhttp.open("GET", "/rest/lego/getCurrentDatas", true); 
+	    xhttp.open("GET", "/rest/t22RestfulProject/getCurrentDatas", true); 
 	    xhttp.send();
 	}
      
@@ -136,7 +136,7 @@
   <div style="display: flex; justify-content: 	space-around;">
   <div>
     <h1>Lego Settings</h1>
-	<h3>Lego</h3>
+	<h3>t22 Lego Robot</h3>
 	<p id='lego'>
 	</p>
 	<h3>Lego Direction Control</h3>

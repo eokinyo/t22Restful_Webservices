@@ -163,7 +163,7 @@ public class LegoService {
 
 	
 	@POST
-	@Path("/setfeedbackcollection")
+	@Path("/setrobotinfo")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createLegoData(RobotInfo ri) {
@@ -195,7 +195,7 @@ public class LegoService {
 	    EntityManager em = emf.createEntityManager();
 	  
 	    try {
-	        Query q = em.createQuery("select f from FeedbackCollection f order by f.id desc").setMaxResults(1);
+	        Query q = em.createQuery("select f from RobotInfo f order by f.id desc").setMaxResults(1);
 	        List<RobotInfo> dataList = q.getResultList();
 	        
 	        if (dataList != null && !dataList.isEmpty()) {
