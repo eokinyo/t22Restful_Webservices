@@ -63,6 +63,13 @@
         xhttp.send();
     }
     var speedChartInstance = null;
+    function genTime() {
+        var minTime = 0.1;
+        var maxTime = 0.5;
+        var randomTime = (Math.random() * (maxTime - minTime) + minTime).toFixed(2);
+        console.log("Generated random time: " + randomTime); // Debug log
+        return parseFloat(randomTime);
+    }
     function createOrUpdateSpeedGraph(labels, speedData) {
         var ctx = document.getElementById("speedChart").getContext("2d");
         if (speedChartInstance) {
@@ -165,7 +172,7 @@ function readAllRobots() {
     xhttp.open("GET", "/rest/t22RestfulProject/getallrobots", true);
     xhttp.send();
 }
-        function sendData(form) {
+function sendData(form) {
     // Create a new JavaScript object for the Robot
     var Robot = {
         name: form.name.value,
@@ -173,23 +180,26 @@ function readAllRobots() {
         iswhite: parseInt(form.iswhite.value),
         angle: parseFloat(form.angle.value),
         color: parseFloat(form.color.value),
-        time: (Math.random() * 0.4 + 0.1).toFixed(2) 
+        time: genTime()
     };
 
+    // Convert the Robot object to a JSON string
     var json = JSON.stringify(Robot);
     var xhttp = new XMLHttpRequest();
 
+    // Handle the server response
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            readAllRobots(); // Refresh the table after submission
+            // Refresh the table after submission
+            readAllRobots();
         }
     };
-
-    // Send a POST request to the server to add the new robot
+    // Send a POST request to the server
     xhttp.open("POST", "/rest/t22RestfulProject/addrobot", true);
     xhttp.setRequestHeader("Content-Type", "application/json");
     xhttp.send(json);
 }
+
         function updateAngleDisplay(value) {
             document.getElementById("angleDisplay").innerText = value;
         }
