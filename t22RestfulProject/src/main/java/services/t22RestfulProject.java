@@ -281,6 +281,7 @@ public class t22RestfulProject {
                 robot.setIswhite(rs.getInt("iswhite"));
                 robot.setAngle(rs.getFloat("angle"));
                 robot.setColor(rs.getFloat("color"));
+                robot.setTime(rs.getFloat("time"));
                 robots.add(robot);
             }
         } catch (SQLException e) {
