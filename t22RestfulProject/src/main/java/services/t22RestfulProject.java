@@ -54,21 +54,24 @@ public class t22RestfulProject {
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Robot> addRobot(Robot t22) {
         ArrayList<Robot> list = new ArrayList<>();
-
         Connection conn = null;
+
         try {
             conn = Connections.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO robot(name, speed, iswhite, angle, color) VALUES(?, ?, ?, ?, ?)");
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO robot(name, speed, iswhite, angle, color, time) VALUES(?, ?, ?, ?, ?, ?)");
             pstmt.setString(1, t22.getName());
             pstmt.setFloat(2, t22.getSpeed());
             pstmt.setInt(3, t22.getIswhite());
             pstmt.setFloat(4, t22.getAngle());
             pstmt.setFloat(5, t22.getColor());
+            pstmt.setFloat(6, t22.getTime());
+
             pstmt.executeUpdate();
 
-            // Read all robots from the database
+            // Read all robots from the database and add them to the list
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM robot");
+
             while (rs.next()) {
                 Robot robot = new Robot();
                 robot.setId(rs.getInt("id"));
@@ -77,6 +80,7 @@ public class t22RestfulProject {
                 robot.setIswhite(rs.getInt("iswhite"));
                 robot.setAngle(rs.getFloat("angle"));
                 robot.setColor(rs.getFloat("color"));
+                robot.setTime(rs.getFloat("time")); // Retrieve the new time property
                 list.add(robot);
             }
         } catch (SQLException e) {
@@ -92,7 +96,6 @@ public class t22RestfulProject {
         }
         return list;
     }
-
     @POST
     @Path("/savejsonrobot")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -293,5 +296,4 @@ public class t22RestfulProject {
         }
         return robots;
     }
-}
 }
