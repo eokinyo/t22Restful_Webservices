@@ -1,171 +1,349 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-  <head>
-    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-    <title>Hello App Engine</title>
-    <style>
-#directionSlider {
-    width: 300px !important; 
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>t22 RestfulProject</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- JavaScript to handle slider input event and data submission -->
+    <script>
+    function readAllRobots() {
+        // Create a new XMLHttpRequest object
+        var xhttp = new XMLHttpRequest();
+        
+        // Define the callback function for when the request completes
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                // Parse the JSON response
+                var robots = JSON.parse(this.responseText);
+                
+                // Get the table body element
+                var tableBody = document.getElementById("robotsTableBody");
+                
+                // Clear the existing rows in the table body
+                tableBody.innerHTML = "";
+                
+                // Variables to hold data for the graphs
+                var speedData = [];
+                var timeData = [];
+                var labels = [];
+                
+                // Loop through each robot and create table rows
+                robots.forEach(function(robot) {
+                    var row = "<tr>";
+                    row += "<td>" + robot.id + "</td>";
+                    row += "<td>" + robot.name + "</td>";
+                    row += "<td>" + robot.speed + "</td>";
+                    row += "<td>" + (robot.iswhite === 1 ? "Yes" : "No") + "</td>";
+                    row += "<td>" + robot.angle + "</td>";
+                    row += "<td>" + robot.color + "</td>";
+                    row += "<td>" + robot.time + "</td>"; // Time column
+                    row += "</tr>";
+                    
+                    // Add the row to the table body
+                    tableBody.innerHTML += row;
+                    
+                    // Add data for the graphs
+                    speedData.push(robot.speed);
+                    timeData.push(robot.time);
+                    labels.push(robot.name);
+                });
+                
+                // Create or update the speed graph
+                createOrUpdateSpeedGraph(labels, speedData);
+                
+                // Create or update the time graph
+                createOrUpdateTimeGraph(labels, timeData);
+            }
+        };
+
+        // Send a GET request to the server to fetch the latest robots data
+        xhttp.open("GET", "/rest/t22RestfulProject/getallrobots", true);
+        xhttp.send();
+    }
+    var speedChartInstance = null;
+    function genTime() {
+        var minTime = 0.1;
+        var maxTime = 0.5;
+        var randomTime = (Math.random() * (maxTime - minTime) + minTime).toFixed(2);
+        console.log("Generated random time: " + randomTime); // Debug log
+        return parseFloat(randomTime);
+    }
+    function createOrUpdateSpeedGraph(labels, speedData) {
+        var ctx = document.getElementById("speedChart").getContext("2d");
+        if (speedChartInstance) {
+            speedChartInstance.data.labels = labels;
+            speedChartInstance.data.datasets[0].data = speedData;
+            speedChartInstance.update();
+            return;
+        }
+        
+        // Create a new bar chart using Chart.js
+        speedChartInstance = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Speed",
+                    data: speedData,
+                    backgroundColor: "rgba(75, 192, 192, 0.6)",
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Speed"
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Robot"
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "Speed of Robots"
+                    }
+                }
+            }
+        });
+    }
+        // Function to submit data and refresh the table
+function readAllRobots() {
+    // Create a new XMLHttpRequest object
+    var xhttp = new XMLHttpRequest();
+    
+    // Define the callback function for when the request completes
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            // Parse the JSON response
+            var robots = JSON.parse(this.responseText);
+            
+            // Get the table body element
+            var tableBody = document.getElementById("robotsTableBody");
+            
+            // Clear the existing rows in the table body
+            tableBody.innerHTML = "";
+            
+            // Variables to hold data for the graphs
+            var speedData = [];
+            var timeData = [];
+            var labels = [];
+            
+            // Loop through each robot and create table rows
+            robots.forEach(function(robot) {
+                var row = "<tr>";
+                row += "<td>" + robot.id + "</td>";
+                row += "<td>" + robot.name + "</td>";
+                row += "<td>" + robot.speed + "</td>";
+                row += "<td>" + (robot.iswhite === 1 ? "Yes" : "No") + "</td>";
+                row += "<td>" + robot.angle + "</td>";
+                row += "<td>" + robot.color + "</td>";
+                row += "<td>" + robot.time + "</td>"; // Time column
+                row += "</tr>";
+                
+                // Add the row to the table body
+                tableBody.innerHTML += row;
+                
+                // Add data for the graphs
+                speedData.push(robot.speed);
+                timeData.push(robot.time);
+                labels.push(robot.name);
+            });
+            
+            // Create or update the speed graph
+            createOrUpdateSpeedGraph(labels, speedData);
+            
+            // Create or update the time graph
+            createOrUpdateTimeGraph(labels, timeData);
+        }
+    };
+
+    // Send a GET request to the server to fetch the latest robots data
+    xhttp.open("GET", "/rest/t22RestfulProject/getallrobots", true);
+    xhttp.send();
 }
- .data-section {
-          background-color: #f8f8f8;
-          border: 1px solid #eaeaea; 
-          padding: 20px; 
-          margin-top: 20px; 
-      }
-</style>
-  </head>
+function sendData(form) {
+    // Create a new JavaScript object for the Robot
+    var Robot = {
+        name: form.name.value,
+        speed: parseFloat(form.speed.value),
+        iswhite: parseInt(form.iswhite.value),
+        angle: parseFloat(form.angle.value),
+        color: parseFloat(form.color.value),
+        time: genTime()
+    };
 
-  <body onload='readLego();getRunStatus();'>
-  <script>
-  function readLego(){
-		var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function() {
-		  if (this.readyState == 4 && this.status == 200) {
-		   var lego=JSON.parse(this.responseText);
-		   document.getElementById("lego").innerHTML="Id="+lego.id+"<br>Name="+lego.name;
-		   document.getElementById("legoid").value=lego.id;
-		   runStatus = lego.run;
-		   var button = document.getElementById('toggleRun');
-	        button.value = (lego.run === 1 ? 'Stop' : 'Start');
-		  }
-		};
-		
-		xhttp.open("GET","/rest/t22RestfulProject/getlego",true);
-		xhttp.send();	  
-  }
-  function sendData(form){
-		//Create a new Javascript object
-		var legoSetting=new Object();
-		legoSetting.speed=form.speed.value;
-		legoSetting.distance=form.distance.value;
-		legoSetting.intensity=form.intensity.value;
-		
-		
-		var lego=new Object();
-		lego.id=form.legoid.value; 
-		legoSetting.lego=lego;
-		
-		var json=JSON.stringify(legoSetting);
-		var xhttp = new XMLHttpRequest();
-		
-		xhttp.onreadystatechange = function() {
-		  if (this.readyState == 4 && this.status == 200) {
-		   var settings=JSON.parse(this.responseText);
-		   document.getElementById("settings").innerHTML="ID="+settings.id+
-		   " Speed="+settings.speed+
-		   " Distance="+settings.distance+
-		   " Intensity="+settings.intensity;
-		  }
-		};
-		
-		xhttp.open("POST","/rest/t22RestfulProject/setvalues",true);
-		xhttp.setRequestHeader("Content-type","application/json");
-		xhttp.send(json);
-	}
-  function stopOrStart() {
-	    runStatus = runStatus === 1 ? 0 : 1;
-	    var data = { run: runStatus };
+    // Convert the Robot object to a JSON string
+    var json = JSON.stringify(Robot);
+    var xhttp = new XMLHttpRequest();
 
-	    var xhttp = new XMLHttpRequest();
-	    xhttp.onreadystatechange = function() {
-	        if (this.readyState == 4) {
-	            if (this.status == 200) {
-	                alert('Run status updated to: ' + runStatus);
-	            } else {
-	                alert('Error updating run status.');
-	            }
-	        }
-	    };
-	    xhttp.open("POST", "/rest/t22RestfulProject/updaterun", true);
-	    xhttp.setRequestHeader("Content-Type", "application/json");
-	    xhttp.send(JSON.stringify(data));
-	}
-  
-  function sendDirectionValue() {
-	    var directionValue = document.getElementById('directionSlider').value;
-	    var legoSetting = {
-	    		direction: parseInt(directionValue, 10),
-// 	            lego: {
-// 	                id: 1  
-// 	            }
-	    };
+    // Handle the server response
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            // Refresh the table after submission
+            readAllRobots();
+        }
+    };
+    // Send a POST request to the server
+    xhttp.open("POST", "/rest/t22RestfulProject/addrobot", true);
+    xhttp.setRequestHeader("Content-Type", "application/json");
+    xhttp.send(json);
+}
 
-	    var xhttp = new XMLHttpRequest();
-	    xhttp.open("POST", "/rest/t22RestfulProject/setDirection", true); 
-	    xhttp.setRequestHeader("Content-Type", "application/json");
-	    xhttp.onreadystatechange = function() {
-	        if (this.readyState === 4) {
-	            if (this.status === 201) {
-	                console.log('succesful');
-	        
-	                document.getElementById("direction").innerHTML = "Direction=" + directionValue;
-	            } else {
-	                console.error('false:', this.responseText);
-	            }
-	        }
-	    };
-	    xhttp.send(JSON.stringify(legoSetting));
-	}
-  function currentDatas() {
-	    var xhttp = new XMLHttpRequest();
-	    xhttp.onreadystatechange = function() {
-	        if (this.readyState === XMLHttpRequest.DONE) {
-	            if (this.status === 200) {
-	                var data = this.responseText.trim().split("#");
-	               
-	                if (data.length >= 4) {
-	                   
-	                    document.getElementById("currentSpeed").textContent = data[0];
-	                    document.getElementById("currentIntensity").textContent = data[1];
-	                    document.getElementById("DistanceTravelled").textContent = data[2];
-	                    document.getElementById("timeTaken").textContent = data[3];
-	                } else {
-	                    console.error('Received data is in the wrong format:', this.responseText);
-	                }
-	            } else {
-	                console.error('Error with the request, status code:', this.status);
-	            }
-	        }
-	    };
-	    xhttp.open("GET", "/rest/t22RestfulProject/getCurrentDatas", true); 
-	    xhttp.send();
-	}
-     
-  </script>
-  <div style="display: flex; justify-content: 	space-around;">
-  <div>
-    <h1>Lego Settings</h1>
-	<h3>t22 Lego Robot</h3>
-	<p id='lego'>
-	</p>
-	<h3>Lego Direction Control</h3>
-    <input type="range" id="directionSlider" min="-200" max="200"  name='direction'oninput="sendDirectionValue()">
-    <p id='direction'>
-	</p>
-	<h3>New values</h3>
-	<form>
-	Id: <input id='legoid' type='text' name='legoid' value=''><br>
-	Speed: <input type='text' name='speed' value=''><br>
-	Intensity:  <input type='text' name='intensity' value=''><br>
-	Distance:  <input type='text' name='distance' value=''><br>
-	
-	<input type='button' name='ok' value='OK' onclick='sendData(this.form);'>
-	</form>
-	<p id='settings'>
-	</p>
-	<h3>Stop or Start</h3>
-	<input type='button' name='toggleRun' value='Toggle Run' onclick='stopOrStart();'>
-	</div>
-	
-	 <div class="data-section">
-      <h1>Robot Data</h1>
-      <p>Current Speed: <span id="currentSpeed"></span></p>
-      <p>Current Intensity: <span id="currentIntensity"></span></p>
-      <p>Distance Travelled: <span id="DistanceTravelled"></span></p>
-      <p>Time Taken: <span id="timeTaken"></span></p>
-      <input type='button' name='current data' value='Update Data' onclick='currentDatas();'>
+        function updateAngleDisplay(value) {
+            document.getElementById("angleDisplay").innerText = value;
+        }
+
+        function updateColorDisplay(value) {
+            document.getElementById("colorDisplay").innerText = value;
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            readAllRobots();
+        });
+     // Define a global variable for the time chart instance
+        var timeChartInstance = null;
+
+        // Function to create or update the time graph
+        function createOrUpdateTimeGraph(labels, timeData) {
+            // Get the canvas element for the time chart
+            var ctx = document.getElementById("timeChart").getContext("2d");
+            
+            // If the chart instance already exists, update the data and return
+            if (timeChartInstance) {
+                timeChartInstance.data.labels = labels;
+                timeChartInstance.data.datasets[0].data = timeData;
+                timeChartInstance.update();
+                return;
+            }
+            
+            // Create a new bar chart using Chart.js
+            timeChartInstance = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Time",
+                        data: timeData,
+                        backgroundColor: "rgba(153, 102, 255, 0.6)",
+                        borderColor: "rgba(153, 102, 255, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: "Time"
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Robot"
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: "Time of Robots"
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4 mb-4">Add Robot</h1>
+
+        <!-- Form to add new robot -->
+        <form onsubmit="sendData(this); return false;">
+            <!-- Form fields for name, speed, iswhite, angle, and color -->
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" id="name" placeholder="Enter name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="speed">Speed:</label>
+                <input type="number" class="form-control" name="speed" id="speed" placeholder="Enter speed" required>
+            </div>
+
+            <div class="form-group">
+                <label>Is white?</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="iswhite" value="0" id="iswhite_no" checked>
+                        <label class="form-check-label" for="iswhite_no">No</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="iswhite" value="1" id="iswhite_yes">
+                        <label class="form-check-label" for="iswhite_yes">Yes</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Angle slider -->
+            <div class="form-group">
+                <label for="angle">Angle:</label>
+                <input type="range" class="form-control-range" name="angle" id="angle" min="1" max="5" step="1" oninput="updateAngleDisplay(this.value)" required>
+                <p>Current Angle: <span id="angleDisplay">3</span></p> <!-- Set default value to 3 -->
+            </div>
+
+            <!-- Color slider -->
+            <div class="form-group">
+                <label for="color">Color:</label>
+                <input type="range" class="form-control-range" name="color" id="color" min="0.12" max="0.4" step="0.01" oninput="updateColorDisplay(this.value)" required>
+                <p>Current Color: <span id="colorDisplay">0.26</span></p> <!-- Set default value to 0.26 -->
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+        <h2 class="mt-4 mb-4">All Robots</h2>
+        <!-- Table to display all robots -->
+        <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Speed</th>
+            <th>Is White?</th>
+            <th>Angle</th>
+            <th>Color</th>
+            <th>Time</th> <!-- Add Time column -->
+        </tr>
+    	</thead>
+    	<tbody id="robotsTableBody">
+        <!-- Robot data will be populated here -->
+    	</tbody>
+		</table>
+
+
+        <p id="t22" class="mt-4"></p>
+         <canvas id="speedChart" width="400" height="200"></canvas>
+         <canvas id="timeChart" width="400" height="200"></canvas>
     </div>
-    	</div>
-  </body>
+
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   
+</body>
 </html>
